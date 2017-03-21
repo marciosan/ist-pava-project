@@ -1,0 +1,27 @@
+<project name="ist-pava-project-1" default="init" basedir=".">
+
+	<path id="project.class.path">
+  		<pathelement location="bin/classes/"/>
+  		<pathelement location="lib/javassist.jar"/>
+	</path>
+
+	<target name="init">
+		<mkdir dir="bin/classes"/>
+	</target>
+	
+	<target name="clean">
+		<delete dir="bin/classes"/>
+	</target>
+	
+	<target name="compile">
+		<javac srcdir="src" destdir="bin/classes" includeantruntime="false" classpathref="project.class.path"/>
+	</target>
+	
+	<target name="run">
+		<java classname="ist.meic.pa.keyConstructors" classpathref="project.class.path">
+		<arg line="${args}"/>
+		</java>
+	</target>
+	
+</project>
+
