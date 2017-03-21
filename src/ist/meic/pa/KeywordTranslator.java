@@ -1,6 +1,7 @@
 package ist.meic.pa;
 
 import java.util.Map;
+import java.util.HashMap;
 
 import javassist.*;
 
@@ -35,27 +36,51 @@ public class KeywordTranslator implements Translator {
 				KeywordArgs ka = (KeywordArgs)annotation;
 				System.out.println(ka.value());
 				
-				// parse arguments on the annotation
-				Map<String, String> argsMap = Parser.parseKeywordArgs(ka.value());
-//				System.out.println("args:");
-//				for(String s : argsMap.keySet())
-//					System.out.println(s + " " + argsMap.get(s));
 				
+				// FIXME: <string, string>
+				Map<String,String> argsMap = annotationToMap(ka.value());
 				makeConstructor(ctClass, ctConstructor, argsMap);
 				
 			}
 		}
 	}
 	
-	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String>argsMap) throws CannotCompileException{
+	private Map<String,String> annotationToMap(String anotStr){
+		HashMap<String,String> map = new HashMap<String,String>();
+		String[] keyVals = anotStr.split(",");
 		
-		/* estrategia:
-		 * 1. usar os valores das anotacoes para atribuir valores aos atributos
-		 * 		- fazer construtor.setbody("this." + map.key + "=" + map.value + ";")
-		 * 2. usar os argumentos do constructor (Object[] ...args) - estao na variavel $args
-		 * 		- para cada par em $args fazer constrcutor.insertAfter("this.args[0] = $args[1];")
-		 * 		- basicamente fazer um for para todos os argumentos
-		*/ 
+		for(String kv: keyVals){
+			String[] keyValues = kv.trim().split("="); 
+			
+			if(keyValues.length !=2){
+				continue;
+			}
+			
+			String key = keyValues[0];
+			String value = keyValues[1];
+				
+			if(key == null || value == null){
+				continue;
+			}
+			
+			map.put(key,value);
+		}
+		return map;
+		
+	}
+	
+	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException{
+		
+		String body = "{\n";
+		for(String k : argsMap.keySet()){
+			body+= String.format("\tthis.%s = \"%s\";\n", k, argsMap.get(k));
+		}
+		body+="}";
+		
+		System.out.println("BODY #########");
+		System.out.println(body);
+		System.out.println("BODY #########");
+		ctConstructor.setBody(body);
 		
 	}
 }

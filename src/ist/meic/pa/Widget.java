@@ -1,9 +1,10 @@
 package ist.meic.pa;
 
 public class Widget{
-	String name;
+	private String name;
+	private String description;
 	
-	@KeywordArgs("name=widget,")
+	@KeywordArgs("name=Default Widget,description=default widget from annotations")
 	public Widget(Object... args){
 		
 		Parser.parseInitializatorArgs(args);
@@ -14,6 +15,6 @@ public class Widget{
 	
 	@Override
 	public String toString(){
-		return String.format("Widget: %s", name);
+		return String.format("Widget (%s) is a (%s).", name, description);
 	}
 }
