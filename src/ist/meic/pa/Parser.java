@@ -11,6 +11,13 @@ public class Parser {
 			
 			Map<String, String> result = new HashMap<String, String>();
 			
+			String[] tokens = s.split(",");
+			
+			for(String token : tokens) {
+				
+				String[] pair = token.split("=");
+				result.put(pair[0], pair[1]);
+			}
 			return result;
 		}
 		else

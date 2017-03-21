@@ -1,13 +1,13 @@
 package ist.meic.pa;
 
 public class Widget{
-	int width;
+	String name;
 	
-	@KeywordArgs("width=10")
+	@KeywordArgs("name=widget,")
 	public Widget(Object... args){}
 	
 	@Override
 	public String toString(){
-		return String.format("Widget - width:%d", width);
+		return String.format("Widget: %s", name);
 	}
 }
