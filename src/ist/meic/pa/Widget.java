@@ -4,7 +4,13 @@ public class Widget{
 	String name;
 	
 	@KeywordArgs("name=widget,")
-	public Widget(Object... args){}
+	public Widget(Object... args){
+		
+		Parser.parseInitializatorArgs(args);
+		
+	}
+	
+
 	
 	@Override
 	public String toString(){

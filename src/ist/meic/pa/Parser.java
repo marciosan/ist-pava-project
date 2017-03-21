@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class Parser {
 	
+	//parse dos atributos da anotação no construtor
 	public static Map<String, String> parseKeywordArgs(String s) {
 		
 		if(s.length() > 0) {
@@ -25,14 +26,32 @@ public class Parser {
 			
 	}
 	
-	public static Map<String, String> parseConstructorArgs(String s) {
+	//parse dos atributos na inicialização
+	public static Map<String, Object> parseInitializatorArgs(Object ...args) {
 		
-		if(s.length() > 0) {
+		if(args.length > 0) {
 			
-			Map<String, String> result = new HashMap<String, String>();
+			Map<String, Object> result = new HashMap<String, Object>();
+			
+						
+			for (int i=0;i<args.length;i++) {
+				
+				String key = (String) args[i];
+				Object value = args[++i];
+
+				result.put(key,value);				
+				
+			}
+			
+//			System.out.println("args init:");
+//			for(String s : result.keySet())
+//			System.out.println(s + " " + result.get(s));
+//			System.out.println("args init end");
 			
 			return result;
+			
 		}
+		
 		else
 			return null;
 			
