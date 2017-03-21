@@ -12,9 +12,7 @@ public class KeywordTranslator implements Translator {
 	@Override
 	public void onLoad(ClassPool pool, String className) throws NotFoundException, CannotCompileException {
 		
-		System.out.println("in");
 		CtClass ctClass = pool.get(className);
-		System.out.println("out");
 		
 		try {
 			test(ctClass);
@@ -25,6 +23,16 @@ public class KeywordTranslator implements Translator {
 	}
 
 	private void test(CtClass ctClass) throws NotFoundException, CannotCompileException, ClassNotFoundException {
-		System.out.println(ctClass.getName());
+		
+		for(CtConstructor ctConstructor: ctClass.getDeclaredConstructors()) {
+			
+			if(ctConstructor.hasAnnotation("ist.meic.pa.KeywordArgs")) {
+				System.out.println("Constructor found: " + ctConstructor.getName());
+				
+				Object annotation = ctConstructor.getAnnotation(KeywordArgs.class);
+				KeywordArgs ka = (KeywordArgs)annotation;
+				System.out.println(ka.value());
+			}
+		}
 	}
 }
