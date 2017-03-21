@@ -13,12 +13,12 @@
 		<delete dir="bin/classes"/>
 	</target>
 	
-	<target name="compile">
+	<target name="compile" depends="init">
 		<javac srcdir="src" destdir="bin/classes" includeantruntime="false" classpathref="project.class.path"/>
 	</target>
 	
 	<target name="run">
-		<java classname="ist.meic.pa.keyConstructors" classpathref="project.class.path">
+		<java classname="ist.meic.pa.KeyConstructors" classpathref="project.class.path">
 		<arg line="${args}"/>
 		</java>
 	</target>
