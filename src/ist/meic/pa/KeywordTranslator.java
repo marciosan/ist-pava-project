@@ -71,15 +71,21 @@ public class KeywordTranslator implements Translator {
 	
 	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException{
 		
+		String [] annotAttribs = {"name", "description"};
+		
 		String body = "{\n";
 		for(String k : argsMap.keySet()){
 			body+= String.format("\tthis.%s = \"%s\";\n", k, argsMap.get(k));
 		}
-		body+= "Object[] args = $1;";
-		body+= "\t this.description = args[1].toString();";
-		//body+= "this. = args[1].toString();\n";
-		//body+= "String.format(\"\t%s = %s\", (String)args[0], (String)args[1]);";
-		body+="}";
+		body+=" \tObject[] args = $1 ;\n";
+		body+= "\tfor(int i = 0; i < args.length; i++) {\n";
+		body+= "\t\tObject o = args[i];\n";
+		//~ body+= "\t\tSystem.out.println(o);\n";
+		for(String attrib: annotAttribs){
+			body+= String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = (String)args[++i];\n", attrib, attrib);
+		}
+		body+="\t}\n"; // end of for }
+		body+="\n}";
 		
 		System.out.println("BODY #########");
 		System.out.println(body);
