@@ -67,11 +67,40 @@ public class KeywordTranslator implements Translator {
 			}
 			
 			Class<?> fieldClass = Class.forName(className).getField(key).getType();
-			Constructor<?> c = fieldClass.getConstructor(String.class);
-			Object obj= c.newInstance(value);
+			
+						
+			Constructor<?> c = null;
+			Object obj = null;
+			
+			if(fieldClass.isPrimitive()){
+				
+				String fieldType = fieldClass.getName();				
+				if (fieldType.equals("int")){					
+					fieldClass = Integer.class;					
+					c = fieldClass.getConstructor(String.class);
+					obj = c.newInstance(value);	
+					obj = ((Integer) obj).intValue();
+				}								
+			}
+			
+			else {			
+			c = fieldClass.getConstructor(String.class);
+			obj= c.newInstance(value);			
+			}
 			
 			// check for wrapper types before inserting in map
+			
 			switch(fieldClass.getSimpleName()) {
+				
+				//case ("Integer"): {
+					
+					//System.out.println("it's an integer");
+					//System.out.println(fieldClass.getSimpleName());
+					
+					//int temp;
+					//temp = obj.intValue();						
+					
+				//}
 			
 			}
 				map.put(key,obj);
@@ -102,7 +131,6 @@ public class KeywordTranslator implements Translator {
 		System.out.println("BODY #########");
 		System.out.println(body);
 		System.out.println("BODY #########");
-		ctConstructor.setBody(body);
-		
+		ctConstructor.setBody(body);		
 	}
 }

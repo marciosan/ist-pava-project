@@ -5,9 +5,9 @@ import java.util.Map;
 public class Widget{
 	public String name;
 	public String description;
-	//public Integer height;
+	public int height;
 	
-	@KeywordArgs("name=\"Default Widget\",description=\"default widget from annotations\"")
+	@KeywordArgs("name=\"Default Widget\",description=\"default widget from annotations\", height=100")
 	public Widget(Object... args){
 		
 		//~ Map<String,Object> map = Parser.parseInitializatorArgs(args);
@@ -18,6 +18,6 @@ public class Widget{
 	
 	@Override
 	public String toString(){
-		return String.format("Widget (%s) is a (%s).", name, description);
+		return String.format("Widget (%s) is a (%s). Height = (%s)", name, description, height);		
 	}
 }
