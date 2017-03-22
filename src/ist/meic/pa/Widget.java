@@ -5,9 +5,9 @@ import java.util.Map;
 public class Widget{
 	public String name;
 	public String description;
-	public Integer height;
+	//public Integer height;
 	
-	@KeywordArgs("name=\"Default Widget\",description=\"default widget from annotations\",height=10")
+	@KeywordArgs("name=\"Default Widget\",description=\"default widget from annotations\"")
 	public Widget(Object... args){
 		
 		//~ Map<String,Object> map = Parser.parseInitializatorArgs(args);

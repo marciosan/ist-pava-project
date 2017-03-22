@@ -3,15 +3,17 @@ package ist.meic.pa;
 import java.util.Map;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javassist.*;
 
 public class KeywordTranslator implements Translator {
-
+	
 	@Override
 	public void start(ClassPool pool) throws NotFoundException, CannotCompileException {
-
+		
 	}
 	
 	@Override
@@ -64,10 +66,16 @@ public class KeywordTranslator implements Translator {
 				continue;
 			}
 			
-			Class fieldClass = Class.forName(className).getField(key).getType();
-			Constructor c = fieldClass.getConstructor(String.class);
+			Class<?> fieldClass = Class.forName(className).getField(key).getType();
+			Constructor<?> c = fieldClass.getConstructor(String.class);
 			Object obj= c.newInstance(value);
-			map.put(key,obj);
+			
+			// check for wrapper types before inserting in map
+			switch(fieldClass.getSimpleName()) {
+			
+			}
+				map.put(key,obj);
+			
 		}
 		return map;
 		
