@@ -75,6 +75,10 @@ public class KeywordTranslator implements Translator {
 		for(String k : argsMap.keySet()){
 			body+= String.format("\tthis.%s = \"%s\";\n", k, argsMap.get(k));
 		}
+		body+= "Object[] args = $1;";
+		body+= "\t this.description = args[1].toString();";
+		//body+= "this. = args[1].toString();\n";
+		//body+= "String.format(\"\t%s = %s\", (String)args[0], (String)args[1]);";
 		body+="}";
 		
 		System.out.println("BODY #########");
