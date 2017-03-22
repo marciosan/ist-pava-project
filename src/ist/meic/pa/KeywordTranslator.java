@@ -1,6 +1,8 @@
 package ist.meic.pa;
 
 import java.util.Map;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 import javassist.*;
@@ -15,18 +17,17 @@ public class KeywordTranslator implements Translator {
 	@Override
 	public void onLoad(ClassPool pool, String className) throws NotFoundException, CannotCompileException {
 		
-		CtClass ctClass = pool.get(className);
-		
 		try {
-			checkAnnotations(ctClass);
+			checkAnnotations(pool, className);
 			
-		} catch (ClassNotFoundException e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void checkAnnotations(CtClass ctClass) throws NotFoundException, CannotCompileException, ClassNotFoundException {
+	private void checkAnnotations(ClassPool pool, String className) throws NotFoundException, CannotCompileException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 		
+		CtClass ctClass = pool.get(className);
 		for(CtConstructor ctConstructor: ctClass.getDeclaredConstructors()) {
 			
 			if(ctConstructor.hasAnnotation("ist.meic.pa.KeywordArgs")) {
@@ -38,15 +39,15 @@ public class KeywordTranslator implements Translator {
 				
 				
 				// FIXME: <string, string>
-				Map<String,String> argsMap = annotationToMap(ka.value());
+				Map<String,Object> argsMap = annotationToMap(ka.value(), className);
 				makeConstructor(ctClass, ctConstructor, argsMap);
 				
 			}
 		}
 	}
 	
-	private Map<String,String> annotationToMap(String anotStr){
-		HashMap<String,String> map = new HashMap<String,String>();
+	private Map<String,Object> annotationToMap(String anotStr, String className) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException{
+		HashMap<String,Object> map = new HashMap<String,Object>();
 		String[] keyVals = anotStr.split(",");
 		
 		for(String kv: keyVals){
@@ -58,24 +59,27 @@ public class KeywordTranslator implements Translator {
 			
 			String key = keyValues[0];
 			String value = keyValues[1];
-				
+			
 			if(key == null || value == null){
 				continue;
 			}
 			
-			map.put(key,value);
+			Class fieldClass = Class.forName(className).getField(key).getType();
+			Constructor c = fieldClass.getConstructor(String.class);
+			Object obj= c.newInstance(value);
+			map.put(key,obj);
 		}
 		return map;
 		
 	}
 	
-	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException{
+	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,Object> argsMap) throws CannotCompileException{
 		
 		String [] annotAttribs = {"name", "description"};
 		
 		String body = "{\n";
 		for(String k : argsMap.keySet()){
-			body+= String.format("\tthis.%s = \"%s\";\n", k, argsMap.get(k));
+			body+= String.format("\tthis.%s = %s;\n", k, argsMap.get(k));
 		}
 		body+=" \tObject[] args = $1 ;\n";
 		body+= "\tfor(int i = 0; i < args.length; i++) {\n";

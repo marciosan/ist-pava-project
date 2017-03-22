@@ -3,10 +3,11 @@ package ist.meic.pa;
 import java.util.Map;
 
 public class Widget{
-	private String name;
-	private String description;
+	public String name;
+	public String description;
+	public Integer height;
 	
-	@KeywordArgs("name=Default Widget,description=default widget from annotations")
+	@KeywordArgs("name=\"Default Widget\",description=\"default widget from annotations\",height=10")
 	public Widget(Object... args){
 		
 		//~ Map<String,Object> map = Parser.parseInitializatorArgs(args);
