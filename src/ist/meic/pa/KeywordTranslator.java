@@ -73,14 +73,7 @@ public class KeywordTranslator implements Translator {
 			Object obj = null;
 			
 			if(fieldClass.isPrimitive()){
-				
-				String fieldType = fieldClass.getName();				
-				if (fieldType.equals("int")){					
-					fieldClass = Integer.class;					
-					c = fieldClass.getConstructor(String.class);
-					obj = c.newInstance(value);	
-					obj = ((Integer) obj).intValue();
-				}								
+				obj = createPrimitive(fieldClass, value);
 			}
 			
 			else {			
@@ -112,7 +105,7 @@ public class KeywordTranslator implements Translator {
 	
 	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,Object> argsMap) throws CannotCompileException{
 		
-		String [] annotAttribs = {"name", "description"};
+		String [] annotAttribs = {"name", "description"}; // FIXME: this is a temporary hack
 		
 		String body = "{\n";
 		for(String k : argsMap.keySet()){
@@ -132,5 +125,43 @@ public class KeywordTranslator implements Translator {
 		System.out.println(body);
 		System.out.println("BODY #########");
 		ctConstructor.setBody(body);		
+	}
+	
+	public Object createPrimitive(Class myClass, String value) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException{
+		String fieldType = myClass.getName();				
+		Object obj = null;
+		Class myField = null;
+		Constructor c = null;	
+		
+		// ordered by byte, short, int, long, float, double, char, boolean
+		if (fieldType.equals("byte")){					
+			obj = new Byte(value).byteValue();
+		}
+		else if (fieldType.equals("short")){					
+			obj = new Short(value).shortValue();
+		}
+		else if (fieldType.equals("int")){					
+			obj = new Integer(value).intValue();
+		}
+		else if (fieldType.equals("long")){					
+			obj = new Long(value).longValue();
+		}
+		else if (fieldType.equals("float")){					
+			obj = new Float(value).floatValue();
+		}
+		else if (fieldType.equals("double")){					
+			obj = new Double(value).doubleValue();
+		}
+		else if (fieldType.equals("char")){					
+			char[] chars = new char[1];
+			value.getChars(0,0,chars,0); // FIXME: check if str has 1 char only???
+			char myChar = chars[0];
+			
+			obj = myChar;
+		}
+		else if (fieldType.equals("boolean")){					
+			obj = new Boolean(value).booleanValue();
+		}
+		return obj;
 	}
 }

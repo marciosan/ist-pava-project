@@ -9,12 +9,7 @@ public class Widget{
 	
 	@KeywordArgs("name=\"Default Widget\",description=\"default widget from annotations\", height=100")
 	public Widget(Object... args){
-		
-		//~ Map<String,Object> map = Parser.parseInitializatorArgs(args);
-		//~ for(String s : map.keySet()) System.out.println(s + " " + map.get(s));
 	}
-	
-
 	
 	@Override
 	public String toString(){
