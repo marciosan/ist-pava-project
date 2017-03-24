@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.lang.reflect.Field;
 
 import javassist.*;
 
@@ -42,12 +43,9 @@ public class KeywordTranslator implements Translator {
 				KeywordArgs ka = (KeywordArgs)annotation;
 				System.out.println(ka.value());
 				
-				
-				// FIXME: <string, string>
 				Map<String,String> argsMap = annotationToMap(ka.value(), className);
 				makeConstructor(ctClass, ctConstructor, argsMap);
 				annotAttribs.clear();
-				
 			}
 		}
 	}
@@ -59,17 +57,24 @@ public class KeywordTranslator implements Translator {
 		for(String kv: keyVals){
 			String[] keyValues = kv.trim().split("="); 
 			
-			// save attribute name 
-			//System.out.println("found annot " + keyValues[0]);
-			this.annotAttribs.add(keyValues[0]);
+			if(keyValues.length < 1 && keyValues[0] != null){ 
+				// should produce array with 1 or 2 indexes (1 without default, 2 with default)
+				continue;
+			}
+			
+			String key = keyValues[0];
+
+			// save attribute name
+			if(! classHasAttribute(Class.forName(className), key)){
+				throw new RuntimeException("FIXME: this should be a NoKeywordException");
+			}
+			this.annotAttribs.add(key);
 			
 			if(keyValues.length !=2){
 				continue;
 			}
 			
-			String key = keyValues[0];
 			String value = keyValues[1];
-			
 			if(key == null || value == null){
 				continue;
 			}
@@ -89,7 +94,7 @@ public class KeywordTranslator implements Translator {
 		body+= "\tfor(int i = 0; i < args.length; i+= 2) {\n";
 		body+= "\t\tObject o = args[i];\n";
 		body+= "\t\tObject value = args[i+1];\n";
-		//~ body+= "\t\tSystem.out.println(o);\n";
+		
 		Class c = Class.forName(ctClass.getName());
 		for(String attrib: annotAttribs){
 			Class fieldClass = c.getField(attrib).getType();
@@ -111,44 +116,6 @@ public class KeywordTranslator implements Translator {
 		System.out.println(body);
 		System.out.println("BODY #########");
 		ctConstructor.setBody(body);		
-	}
-	
-	public Object createPrimitive(Class myClass, String value) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException{
-		String fieldType = myClass.getName();				
-		Object obj = null;
-		Class myField = null;
-		Constructor c = null;	
-		
-		// ordered by byte, short, int, long, float, double, char, boolean
-		if (fieldType.equals("byte")){					
-			obj = new Byte(value).byteValue();
-		}
-		else if (fieldType.equals("short")){					
-			obj = new Short(value).shortValue();
-		}
-		else if (fieldType.equals("int")){					
-			obj = new Integer(value).intValue();
-		}
-		else if (fieldType.equals("long")){					
-			obj = new Long(value).longValue();
-		}
-		else if (fieldType.equals("float")){					
-			obj = new Float(value).floatValue();
-		}
-		else if (fieldType.equals("double")){					
-			obj = new Double(value).doubleValue();
-		}
-		else if (fieldType.equals("char")){					
-			char[] chars = new char[1];
-			value.getChars(0,0,chars,0); // FIXME: check if str has 1 char only???
-			char myChar = chars[0];
-			
-			obj = myChar;
-		}
-		else if (fieldType.equals("boolean")){					
-			obj = new Boolean(value).booleanValue();
-		}
-		return obj;
 	}
 
 	public String primitiveCasting(String className){
@@ -180,5 +147,20 @@ public class KeywordTranslator implements Translator {
 		}
 		
 		return str;
+	}
+
+	// FIXME: need to also check superclasses
+	public boolean classHasAttribute(Class<?> aClass, String attribute) throws NoSuchFieldException{
+		 if (aClass == null){ return false; }
+		 
+		 Field f = null;
+		 try{
+			 f = aClass.getField(attribute);
+		 }
+		 catch (NoSuchFieldException e){
+			throw new RuntimeException ("Unrecognized keyword: " + attribute); 
+		 }
+		 
+		 return f == null? false : true;
 	}
 }
