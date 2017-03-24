@@ -11,9 +11,12 @@ import javassist.*;
 
 public class KeywordTranslator implements Translator {
 	
+	List<String> annotAttribs;
+	
 	@Override
 	public void start(ClassPool pool) throws NotFoundException, CannotCompileException {
-		
+	
+		annotAttribs = new ArrayList<String>();
 	}
 	
 	@Override
@@ -66,9 +69,11 @@ public class KeywordTranslator implements Translator {
 				continue;
 			}
 			
+			// save attribute name 
+			this.annotAttribs.add(key);
+			
 			Class<?> fieldClass = Class.forName(className).getField(key).getType();
 			
-						
 			Constructor<?> c = null;
 			Object obj = null;
 			
@@ -104,8 +109,6 @@ public class KeywordTranslator implements Translator {
 	}
 	
 	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,Object> argsMap) throws CannotCompileException{
-		
-		String [] annotAttribs = {"name", "description"}; // FIXME: this is a temporary hack
 		
 		String body = "{\n";
 		for(String k : argsMap.keySet()){
