@@ -53,6 +53,11 @@ public class KeywordTranslator implements Translator {
 	
 	private Map<String,String> annotationToMap(String anotStr, String className) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException{
 		HashMap<String,String> map = new HashMap<String,String>();
+		
+		// empty annotation
+//		if(anotStr.trim().isEmpty())
+//			return map;
+		
 		String[] keyVals = anotStr.split(",");
 		
 		for(String kv: keyVals){
@@ -87,9 +92,11 @@ public class KeywordTranslator implements Translator {
 	
 	private void makeEmptyConstructor(CtClass ctClass) throws CannotCompileException{
 		
-		CtConstructor ct = new CtConstructor(null, ctClass);
-		ct.setBody("{}");
+		CtConstructor ct = CtNewConstructor.defaultConstructor(ctClass);
 		ctClass.addConstructor(ct);
+		
+		CtConstructor[] classCons = ctClass.getConstructors(); // TODO delete
+		System.out.println("Number of constrcutors is " + classCons.length); // TODO delete
 	}
 	
 	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException, ClassNotFoundException, NoSuchFieldException{

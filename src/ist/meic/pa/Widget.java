@@ -13,6 +13,6 @@ public class Widget{
 	
 	@Override
 	public String toString(){
-		return String.format("Widget (%s) is a (%s). Height = (%s), Width = (%s)", name, description, height, width);		
+		return String.format("Widget (%s) is a (%s). Height = (%s), Width = (%s),", name, description, height, width);		
 	}
 }
