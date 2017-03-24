@@ -45,6 +45,7 @@ public class KeywordTranslator implements Translator {
 				
 				Map<String,String> argsMap = annotationToMap(ka.value(), className);
 				makeConstructor(ctClass, ctConstructor, argsMap);
+				makeEmptyConstructor(ctClass);
 				annotAttribs.clear();
 			}
 		}
@@ -82,6 +83,13 @@ public class KeywordTranslator implements Translator {
 			map.put(key,value);
 		}
 		return map;
+	}
+	
+	private void makeEmptyConstructor(CtClass ctClass) throws CannotCompileException{
+		
+		CtConstructor ct = new CtConstructor(null, ctClass);
+		ct.setBody("{}");
+		ctClass.addConstructor(ct);
 	}
 	
 	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException, ClassNotFoundException, NoSuchFieldException{

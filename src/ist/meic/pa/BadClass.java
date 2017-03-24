@@ -5,7 +5,7 @@ public class BadClass{
 	public String name;
 
 	
-	@KeywordArgs("nnnname")
+	@KeywordArgs("")
 	public BadClass(Object... args){
 	}
 	
