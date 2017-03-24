@@ -66,7 +66,7 @@ public class KeywordTranslator implements Translator {
 
 			// save attribute name
 			if(! classHasAttribute(Class.forName(className), key)){
-				throw new RuntimeException("FIXME: this should be a NoKeywordException");
+				continue;
 			}
 			this.annotAttribs.add(key);
 			
@@ -93,12 +93,28 @@ public class KeywordTranslator implements Translator {
 		body+=" \tObject[] args = $1 ;\n";
 		body+= "\tfor(int i = 0; i < args.length; i+= 2) {\n";
 		body+= "\t\tObject o = args[i];\n";
-		body+= "\t\tObject value = args[i+1];\n";
+		body+= "\t\tObject value = args[i+1];\n\n";
+		
+		body += "\t\tjava.util.ArrayList attributes = new java.util.ArrayList();\n\n";
 		
 		Class c = Class.forName(ctClass.getName());
 		for(String attrib: annotAttribs){
+			body+= String.format("\t\tattributes.add(\"%s\");\n", attrib); 
+			
+			if(! classHasAttribute(c, attrib)){
+				continue;
+			}
+		}
+		
+		body+="\n\n";
+			
+		for(String attrib: annotAttribs){
+			
 			Class fieldClass = c.getField(attrib).getType();
 			String className = fieldClass.getName();
+			
+			body += "if(! attributes.contains((String)o)){ " +
+				"throw new RuntimeException(\"Unrecognized keyword: \" + (String) o); }\n\n";
 			
 			if(fieldClass.isPrimitive()){
 				String attribution = primitiveCasting(className);

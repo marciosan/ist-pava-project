@@ -6,10 +6,10 @@ public class Test{
 		//~ Widget w0 = new Widget();
 		//~ System.out.println(w0);
 		
-		Widget w1 = new Widget("description", "overriden description");
-		System.out.println(w1);
+		//~ Widget w1 = new Widget("description", "overriden description");
+		//~ System.out.println(w1);
 		
-		//~ Widget w2 = new Widget("name", "uniq widget", "description", "args are working", "height", 99, "width", 3.14);
+		//~ Widget w2 = new Widget("name", "bad params on widget", "weight", 3.0);
 		//~ System.out.println(w2);
 		
 		//~ Primitives p1 = new Primitives();
@@ -23,6 +23,6 @@ public class Test{
 		//ExtendedWidget ex = new ExtendedWidget("ratio", "10000000");
 		
 		
-		//~ System.out.println(new BadClass());
+		System.out.println(new BadClass());
 	}
 }
