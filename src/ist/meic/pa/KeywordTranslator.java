@@ -196,12 +196,13 @@ public class KeywordTranslator implements Translator {
 			str = "((Long) value).longValue();";				
 		}
 		else if (className.equals("float")){					
-			str = "((Double) value).floatValue();"; // TODO: is double ok?
+			str = "((Float) value).floatValue();"; // TODO: is double ok?
 		}
 		else if (className.equals("double")){
 			str = "((Double) value).doubleValue();";				
 		}
-		else if (className.equals("char")){					
+		else if (className.equals("char")){
+			// FIXME: implementar char					
 		}
 		else if (className.equals("boolean")){
 			str = "((Boolean) value).booleanValue();";
