@@ -46,6 +46,7 @@ public class KeywordTranslator implements Translator {
 				// FIXME: <string, string>
 				Map<String,Object> argsMap = annotationToMap(ka.value(), className);
 				makeConstructor(ctClass, ctConstructor, argsMap);
+				annotAttribs.clear();
 				
 			}
 		}
@@ -59,6 +60,7 @@ public class KeywordTranslator implements Translator {
 			String[] keyValues = kv.trim().split("="); 
 			
 			// save attribute name 
+			//System.out.println("found annot " + keyValues[0]);
 			this.annotAttribs.add(keyValues[0]);
 			
 			if(keyValues.length !=2){

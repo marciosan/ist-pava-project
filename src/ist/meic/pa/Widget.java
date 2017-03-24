@@ -1,6 +1,5 @@
 package ist.meic.pa;
 
-import java.util.Map;
 
 public class Widget{
 	public String name;
