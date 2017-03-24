@@ -15,14 +15,14 @@ public class Test{
 		//~ Primitives p1 = new Primitives();
 		//~ System.out.println(p1);
 		
-		//~ Primitives p2 = new Primitives("byt", (byte) 11, "shrt", 
-			//~ (short) 12, "i", 13, "l", (long) 14444444, "f", (float) 15.55, "d", 
-			//~ (double) 10 + Math.PI, "c", 'k', "bool", true);
-		//~ System.out.println(p2);
+		Primitives p2 = new Primitives("byt", (byte) 11, "shrt", 
+			(short) 12, "i", 13, "l", (long) 14444444, "f", (float) 15.55, "d", 
+			(double) 10 + Math.PI, "c", 'k', "bool", true);
+		System.out.println(p2);
 		
 		//ExtendedWidget ex = new ExtendedWidget("ratio", "10000000");
 		
 		
-		System.out.println(new BadClass());
+		//~ System.out.println(new BadClass());
 	}
 }

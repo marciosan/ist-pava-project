@@ -91,20 +91,27 @@ public class KeywordTranslator implements Translator {
 			body+= String.format("\tthis.%s = %s;\n", k, argsMap.get(k));
 		}
 		body+=" \tObject[] args = $1 ;\n";
-		body+= "\tfor(int i = 0; i < args.length; i+= 2) {\n";
-		body+= "\t\tObject o = args[i];\n";
-		body+= "\t\tObject value = args[i+1];\n\n";
+		body+="\n\n";
 		
-		body += "\t\tjava.util.ArrayList attributes = new java.util.ArrayList();\n\n";
+		body += "\tjava.util.ArrayList attributes = new java.util.ArrayList();\n";
 		
+		// create arraylist with attributes
+		// constructor will need this at runtime to process parameters
 		Class c = Class.forName(ctClass.getName());
 		for(String attrib: annotAttribs){
-			body+= String.format("\t\tattributes.add(\"%s\");\n", attrib); 
+			body+= String.format("\tattributes.add(\"%s\");\n", attrib); 
 			
 			if(! classHasAttribute(c, attrib)){
 				continue;
 			}
 		}
+		
+		body+="\n";
+
+		// LOOP IN JAVASSIST
+		body+= "\tfor(int i = 0; i < args.length; i+= 2) {\n";
+		body+= "\t\tObject o = args[i];\n";
+		body+= "\t\tObject value = args[i+1];\n\n";
 		
 		body+="\n\n";
 			
@@ -113,17 +120,17 @@ public class KeywordTranslator implements Translator {
 			Class fieldClass = c.getField(attrib).getType();
 			String className = fieldClass.getName();
 			
-			body += "if(! attributes.contains((String)o)){ " +
-				"throw new RuntimeException(\"Unrecognized keyword: \" + (String) o); }\n\n";
+			body += "\t\tif(! attributes.contains((String)o)){ " +
+				"throw new RuntimeException(\"Unrecognized keyword: \" + (String) o); }\n";
 			
 			if(fieldClass.isPrimitive()){
 				String attribution = primitiveCasting(className);
-				body += String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = %s\n", attrib, attrib, attribution);
+				body += String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = %s\n\n", attrib, attrib, attribution);
 				
 				continue;
 			}
 			
-			body+= String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = (%s) value;\n", attrib, attrib, className);
+			body+= String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = (%s) value;\n\n", attrib, attrib, className);
 		}
 		body+="\t}\n"; // end of for }
 		body+="\n}";
