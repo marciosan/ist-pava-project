@@ -44,7 +44,7 @@ public class KeywordTranslator implements Translator {
 				
 				
 				// FIXME: <string, string>
-				Map<String,Object> argsMap = annotationToMap(ka.value(), className);
+				Map<String,String> argsMap = annotationToMap(ka.value(), className);
 				makeConstructor(ctClass, ctConstructor, argsMap);
 				annotAttribs.clear();
 				
@@ -52,8 +52,8 @@ public class KeywordTranslator implements Translator {
 		}
 	}
 	
-	private Map<String,Object> annotationToMap(String anotStr, String className) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException{
-		HashMap<String,Object> map = new HashMap<String,Object>();
+	private Map<String,String> annotationToMap(String anotStr, String className) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException{
+		HashMap<String,String> map = new HashMap<String,String>();
 		String[] keyVals = anotStr.split(",");
 		
 		for(String kv: keyVals){
@@ -74,43 +74,12 @@ public class KeywordTranslator implements Translator {
 				continue;
 			}
 			
-			Class<?> fieldClass = Class.forName(className).getField(key).getType();
-			
-			Constructor<?> c = null;
-			Object obj = null;
-			
-			if(fieldClass.isPrimitive()){
-				obj = createPrimitive(fieldClass, value);
-			}
-			
-			else {			
-			c = fieldClass.getConstructor(String.class);
-			obj= c.newInstance(value);			
-			}
-			
-			// check for wrapper types before inserting in map
-			
-			switch(fieldClass.getSimpleName()) {
-				
-				//case ("Integer"): {
-					
-					//System.out.println("it's an integer");
-					//System.out.println(fieldClass.getSimpleName());
-					
-					//int temp;
-					//temp = obj.intValue();						
-					
-				//}
-			
-			}
-				map.put(key,obj);
-			
+			map.put(key,value);
 		}
 		return map;
-		
 	}
 	
-	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,Object> argsMap) throws CannotCompileException, ClassNotFoundException, NoSuchFieldException{
+	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException, ClassNotFoundException, NoSuchFieldException{
 		
 		String body = "{\n";
 		for(String k : argsMap.keySet()){
@@ -204,7 +173,7 @@ public class KeywordTranslator implements Translator {
 			str = "((Double) value).doubleValue();";				
 		}
 		else if (className.equals("char")){
-			// FIXME: implementar char					
+			str = "((Character) value).charValue();";				
 		}
 		else if (className.equals("boolean")){
 			str = "((Boolean) value).booleanValue();";

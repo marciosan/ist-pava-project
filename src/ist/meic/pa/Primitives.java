@@ -14,7 +14,7 @@ public class Primitives{
 	public String name;
 	public String description;
 	
-	@KeywordArgs("byt=1,shrt=2,i=3,l=4444444,f=5.55,d=6.66,bool=True")
+	@KeywordArgs("byt=1,shrt=2,i=3,l=4444444,f=5.55,d=3+ Math.PI,c='c',bool=true")
 	public Primitives(Object... args){}
 	
 	@Override 
