@@ -58,6 +58,9 @@ public class KeywordTranslator implements Translator {
 		for(String kv: keyVals){
 			String[] keyValues = kv.trim().split("="); 
 			
+			// save attribute name 
+			this.annotAttribs.add(keyValues[0]);
+			
 			if(keyValues.length !=2){
 				continue;
 			}
@@ -68,9 +71,6 @@ public class KeywordTranslator implements Translator {
 			if(key == null || value == null){
 				continue;
 			}
-			
-			// save attribute name 
-			this.annotAttribs.add(key);
 			
 			Class<?> fieldClass = Class.forName(className).getField(key).getType();
 			
@@ -108,18 +108,30 @@ public class KeywordTranslator implements Translator {
 		
 	}
 	
-	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,Object> argsMap) throws CannotCompileException{
+	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,Object> argsMap) throws CannotCompileException, ClassNotFoundException, NoSuchFieldException{
 		
 		String body = "{\n";
 		for(String k : argsMap.keySet()){
 			body+= String.format("\tthis.%s = %s;\n", k, argsMap.get(k));
 		}
 		body+=" \tObject[] args = $1 ;\n";
-		body+= "\tfor(int i = 0; i < args.length; i++) {\n";
+		body+= "\tfor(int i = 0; i < args.length; i+= 2) {\n";
 		body+= "\t\tObject o = args[i];\n";
+		body+= "\t\tObject value = args[i+1];\n";
 		//~ body+= "\t\tSystem.out.println(o);\n";
+		Class c = Class.forName(ctClass.getName());
 		for(String attrib: annotAttribs){
-			body+= String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = (String)args[++i];\n", attrib, attrib);
+			Class fieldClass = c.getField(attrib).getType();
+			String className = fieldClass.getName();
+			
+			if(fieldClass.isPrimitive()){
+				String attribution = primitiveCasting(className);
+				body += String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = %s\n", attrib, attrib, attribution);
+				
+				continue;
+			}
+			
+			body+= String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = (%s) value;\n", attrib, attrib, className);
 		}
 		body+="\t}\n"; // end of for }
 		body+="\n}";
@@ -166,5 +178,35 @@ public class KeywordTranslator implements Translator {
 			obj = new Boolean(value).booleanValue();
 		}
 		return obj;
+	}
+
+	public String primitiveCasting(String className){
+		String str = "";
+		
+		if (className.equals("byte")){	
+			str = "((Byte) value).byteValue();";				
+		}
+		else if (className.equals("short")){	
+			str = "((Short) value).shortValue();";				
+		}
+		else if (className.equals("int")){					
+			str = "((Integer) value).intValue();";
+		}
+		else if (className.equals("long")){
+			str = "((Long) value).longValue();";				
+		}
+		else if (className.equals("float")){					
+			str = "((Double) value).floatValue();"; // TODO: is double ok?
+		}
+		else if (className.equals("double")){
+			str = "((Double) value).doubleValue();";				
+		}
+		else if (className.equals("char")){					
+		}
+		else if (className.equals("boolean")){
+			str = "((Boolean) value).booleanValue();";
+		}
+		
+		return str;
 	}
 }
