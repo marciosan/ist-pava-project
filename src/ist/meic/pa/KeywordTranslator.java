@@ -1,10 +1,12 @@
 package ist.meic.pa;
 
 import java.util.Map;
+import java.util.Set;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.lang.reflect.Field;
 
@@ -41,9 +43,8 @@ public class KeywordTranslator implements Translator {
 				
 				Object annotation = ctConstructor.getAnnotation(KeywordArgs.class);
 				KeywordArgs ka = (KeywordArgs)annotation;
-				System.out.println(ka.value());
 				
-				Map<String,String> argsMap = annotationToMap(ka.value(), className);
+				Map<String,String> argsMap = annotationToMap(ka.value(), className, new HashMap<String,String>());
 				makeConstructor(ctClass, ctConstructor, argsMap);
 				makeEmptyConstructor(ctClass);
 				annotAttribs.clear();
@@ -51,9 +52,12 @@ public class KeywordTranslator implements Translator {
 		}
 	}
 	
-	private Map<String,String> annotationToMap(String anotStr, String className) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException{
-		HashMap<String,String> map = new HashMap<String,String>();
-		
+	private Map<String,String> annotationToMap(String anotStr, String className, Map<String, String> map) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException{
+
+		System.out.println(">>>>>>>entering class " + className);
+		System.out.println(">>>>>>>annot: " + anotStr);
+		for(String s : annotAttribs)
+			System.out.println("Annot when entering class " + className + ": " + s);
 		// empty annotation
 		if(anotStr.trim().isEmpty())
 			return map;
@@ -69,12 +73,14 @@ public class KeywordTranslator implements Translator {
 			}
 			
 			String key = keyValues[0];
+			System.out.println("Found key: " + key);
 
 			// save attribute name
 			if(! classHasAttribute(Class.forName(className), key)){
 				continue;
 			}
 			this.annotAttribs.add(key);
+			System.out.println("Added key: " + key);
 			
 			if(keyValues.length !=2){
 				continue;
@@ -85,8 +91,35 @@ public class KeywordTranslator implements Translator {
 				continue;
 			}
 			
-			map.put(key,value);
+			if(!map.containsKey(key)) {
+				map.put(key,value);
+				System.out.println("map.put " + key + "," + value);
+			}
 		}
+		
+		// collect annotations from the superclass
+		Class<?> superClass = Class.forName(className).getSuperclass();
+		if(superClass != null) {
+			
+			Constructor<?>[] cons = superClass.getDeclaredConstructors();
+			KeywordArgs annot = (KeywordArgs) cons[0].getAnnotation(KeywordArgs.class);
+			
+			if(Class.forName(className).equals("Object") || annot == null)
+				return map;
+			
+			String superClassName = superClass.getName();
+			annotationToMap(annot.value(), superClassName, map);
+		}
+
+		// remove duplicates from the annotations list
+		Set<String> hs = new HashSet<String>();
+		hs.addAll(annotAttribs);
+		annotAttribs.clear();
+		annotAttribs.addAll(hs);
+		for(String s : annotAttribs)
+			System.out.println("Annot when exiting class " + className + ": " + s);
+		System.out.println("-----------------------");
+					
 		return map;
 	}
 	
@@ -194,7 +227,6 @@ public class KeywordTranslator implements Translator {
 		return str;
 	}
 
-	// FIXME: need to also check superclasses
 	public boolean classHasAttribute(Class<?> aClass, String attribute) throws NoSuchFieldException{
 		 if(aClass == null){
 			 return false;
