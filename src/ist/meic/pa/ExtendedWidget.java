@@ -1,18 +1,13 @@
 package ist.meic.pa;
 
-public class ExtendedWidget extends Widget {
+class ExtendedWidget extends Widget {
+	String name;
 
-	public int ratio;
-	
-	@KeywordArgs("ratio=10")
-	public ExtendedWidget(Object... args) {
-		
-	}
-	
-	@Override
-	public String toString(){
-		String res = super.toString();
-		res += String.format(" Ratio = (%d).", ratio);
-		return res;
+	@KeywordArgs("name=\"Extended\",width=200,margin=10")
+	public ExtendedWidget(Object... args) {}
+
+	public String toString() {
+		return String.format("width:%s,height:%s,margin:%s,name:%s",
+				width, height, margin, name);
 	}
 }

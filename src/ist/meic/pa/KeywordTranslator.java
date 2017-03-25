@@ -129,11 +129,25 @@ public class KeywordTranslator implements Translator {
 		body+= "\t\tObject value = args[i+1];\n\n";
 		
 		body+="\n\n";
-			
+		
+		Class fieldClass = null;
+		String className = null;
 		for(String attrib: annotAttribs){
 			
-			Class fieldClass = c.getField(attrib).getType();
-			String className = fieldClass.getName();
+			try {
+				fieldClass = c.getField(attrib).getType();
+				className = fieldClass.getName();
+			}
+			catch (NoSuchFieldException ex) {
+				Field[] fields = c.getDeclaredFields();
+				
+				for(Field f : fields) {
+					 if(f.getName().equals(attrib)) {
+						 fieldClass = f.getType();
+						 className = fieldClass.getName();
+					 }
+				}
+			}
 			
 			body += "\t\tif(! attributes.contains((String)o)){ " +
 				"throw new RuntimeException(\"Unrecognized keyword: \" + (String) o); }\n";
@@ -191,14 +205,17 @@ public class KeywordTranslator implements Translator {
 	public boolean classHasAttribute(Class<?> aClass, String attribute) throws NoSuchFieldException{
 		 if (aClass == null){ return false; }
 		 
-		 Field f = null;
-		 try{
-			 f = aClass.getField(attribute);
-		 }
-		 catch (NoSuchFieldException e){
-			throw new RuntimeException ("Unrecognized keyword: " + attribute); 
-		 }
+		 Field[] fields = aClass.getDeclaredFields();
 		 
-		 return f == null? false : true;
+		 boolean hasAttribute = false;
+		 for(Field f : fields)
+			 if(f.getName().equals(attribute))
+				 hasAttribute = true;
+		 
+		 if(!hasAttribute)
+			throw new RuntimeException ("Unrecognized keyword: " + attribute);
+		 
+		 return hasAttribute;
+		 
 	}
 }
