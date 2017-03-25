@@ -35,5 +35,7 @@ public class Test{
 		System.err.println(new Widget("height", 30));
 		System.err.println(new Widget("margin", 2));
 		System.err.println(new Widget("width", 8, "height", 13, "margin", 21));
+		
+		System.err.println(new ComplexStrings());
 	}
 }

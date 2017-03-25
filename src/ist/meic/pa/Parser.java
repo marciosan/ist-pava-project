@@ -56,7 +56,10 @@ public class Parser {
 			
 	}
 	
-	public static String[] splitByComma(String line){
+	public static String[] splitBy(String line, char splitter){
+		// this function splits by ',' or '=' depending on [splitter]
+		// it must not split a [splitter] inside the following expressions: () {} "" ''
+		
 		// tested with the following values
 		// String [] inputs = {"a=1,b=2", "a=func(1,2,3),b=5", "a={1,2,3}", "a=\"1,2,3\",b=5","a=\',\',b=7","a=\"a,\\\",b \""};
 		
@@ -72,7 +75,7 @@ public class Parser {
 		for(int i = 0; i < line.length(); i++){
 			char c = charArr[i];
 			
-			if( c == ',' && nParenthesis == 0 && nBrackets == 0 
+			if( c == splitter && nParenthesis == 0 && nBrackets == 0 
 				&& !insideString && !insideChar){
 				
 				strList.add(sb.toString());

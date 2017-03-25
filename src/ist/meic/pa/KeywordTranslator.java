@@ -58,10 +58,10 @@ public class KeywordTranslator implements Translator {
 		if(anotStr.trim().isEmpty())
 			return map;
 		
-		String[] keyVals = Parser.splitByComma(anotStr);
+		String[] keyVals = Parser.splitBy(anotStr, ',');
 		
 		for(String kv: keyVals){
-			String[] keyValues = kv.trim().split("="); 
+			String[] keyValues = Parser.splitBy(kv.trim(), '=');
 			
 			if(keyValues.length < 1 && keyValues[0] != null){ 
 				// should produce array with 1 or 2 indexes (1 without default, 2 with default)
