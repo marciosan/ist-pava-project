@@ -11,8 +11,14 @@ import java.lang.reflect.Field;
 import javassist.*;
 
 public class KeywordTranslator implements Translator {
-	
+	static final boolean DEBUG = false;
 	List<String> annotAttribs;
+	
+	public static void debug(String s){
+		if(KeywordTranslator.DEBUG){
+			System.err.println(s);
+		}
+	}
 	
 	@Override
 	public void start(ClassPool pool) throws NotFoundException, CannotCompileException {
@@ -37,11 +43,11 @@ public class KeywordTranslator implements Translator {
 		for(CtConstructor ctConstructor: ctClass.getDeclaredConstructors()) {
 			
 			if(ctConstructor.hasAnnotation("ist.meic.pa.KeywordArgs")) {
-				System.out.println("Constructor found: " + ctConstructor.getName());
+				KeywordTranslator.debug("Constructor found: " + ctConstructor.getName());
 				
 				Object annotation = ctConstructor.getAnnotation(KeywordArgs.class);
 				KeywordArgs ka = (KeywordArgs)annotation;
-				System.out.println(ka.value());
+				KeywordTranslator.debug(ka.value());
 				
 				Map<String,String> argsMap = annotationToMap(ka.value(), className);
 				makeConstructor(ctClass, ctConstructor, argsMap);
@@ -157,9 +163,9 @@ public class KeywordTranslator implements Translator {
 		body+="\t}\n"; // end of for }
 		body+="\n}";
 		
-		System.out.println("BODY #########");
-		System.out.println(body);
-		System.out.println("BODY #########");
+		KeywordTranslator.debug("BODY #########");
+		KeywordTranslator.debug(body);
+		KeywordTranslator.debug("BODY #########");
 		ctConstructor.setBody(body);		
 	}
 

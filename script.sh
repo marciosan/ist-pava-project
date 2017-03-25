@@ -4,7 +4,9 @@
 set OUTS_DIR tests
 
 for i in (find src/ist/meic/pa/tests/ | grep "Test" | grep -Eo '.\.' | grep -Eo '[^.]*' | sort)
-	java -jar bin/classes/keyConstructors.jar Test$i > /tmp/$i.out
+	java -jar bin/classes/keyConstructors.jar Test$i ^ /tmp/$i.out
+	
+	echo -e \n\n $i =============================\n\n
 	diff /tmp/$i.out $OUTS_DIR/out$i.txt
-	echo $i
+	
 end
