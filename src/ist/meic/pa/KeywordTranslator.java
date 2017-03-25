@@ -94,9 +94,6 @@ public class KeywordTranslator implements Translator {
 		
 		CtConstructor ct = CtNewConstructor.defaultConstructor(ctClass);
 		ctClass.addConstructor(ct);
-		
-		CtConstructor[] classCons = ctClass.getConstructors(); // TODO delete
-		System.out.println("Number of constrcutors is " + classCons.length); // TODO delete
 	}
 	
 	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException, ClassNotFoundException, NoSuchFieldException{
@@ -134,20 +131,8 @@ public class KeywordTranslator implements Translator {
 		String className = null;
 		for(String attrib: annotAttribs){
 			
-			try {
-				fieldClass = c.getField(attrib).getType();
-				className = fieldClass.getName();
-			}
-			catch (NoSuchFieldException ex) {
-				Field[] fields = c.getDeclaredFields();
-				
-				for(Field f : fields) {
-					 if(f.getName().equals(attrib)) {
-						 fieldClass = f.getType();
-						 className = fieldClass.getName();
-					 }
-				}
-			}
+			fieldClass = getFieldClass(c, attrib);
+			className = fieldClass.getName();
 			
 			body += "\t\tif(! attributes.contains((String)o)){ " +
 				"throw new RuntimeException(\"Unrecognized keyword: \" + (String) o); }\n";
@@ -203,19 +188,64 @@ public class KeywordTranslator implements Translator {
 
 	// FIXME: need to also check superclasses
 	public boolean classHasAttribute(Class<?> aClass, String attribute) throws NoSuchFieldException{
-		 if (aClass == null){ return false; }
+		 if(aClass == null){
+			 return false;
+		 }
+		 
+		 Field[] fields = aClass.getDeclaredFields();
+		 boolean hasAttribute = false;
+		 
+		 for(Field f : fields) {
+			 if(f.getName().equals(attribute)) { // class has attribute
+				 hasAttribute = true;
+			 	 break;
+			 }
+		 }
+		 
+		 if(!hasAttribute) {// attribute not in this class; look in super classes
+			 Class<?> superClass = aClass.getSuperclass();
+			 
+//			 if(superClass.getSimpleName().equals("Object"))
+//			 	hasAttribute = false;
+//			 else
+		 		hasAttribute = classHasAttribute(superClass, attribute);
+		}
+		 
+		 return hasAttribute;
+	}
+	
+	public Class<?> getFieldClass(Class<?> aClass, String attribute) {
+		
+		Class<?> fieldClass = null;
+		boolean hasAttribute = false;
+		
+		 if(aClass == null){
+			 return null;
+		 }
 		 
 		 Field[] fields = aClass.getDeclaredFields();
 		 
-		 boolean hasAttribute = false;
-		 for(Field f : fields)
-			 if(f.getName().equals(attribute))
+		 for(Field f : fields) {
+			 if(f.getName().equals(attribute)) { // class has attribute
 				 hasAttribute = true;
+				 fieldClass = f.getType();
+			 	 break;
+			 }
+		 }
 		 
-		 if(!hasAttribute)
-			throw new RuntimeException ("Unrecognized keyword: " + attribute);
+		 if(!hasAttribute) {// attribute not in this class; look in super classes
+			 Class<?> superClass = aClass.getSuperclass();
+			 
+			 if(superClass != null)
+//			 if(superClass.getSimpleName().equals("Object"))
+//			 	hasAttribute = false;
+//			 else
+		 		fieldClass = getFieldClass(superClass, attribute);
+		}
 		 
-		 return hasAttribute;
-		 
+		if(fieldClass == null)
+			throw new RuntimeException("Unrecognized keyword: " + attribute);
+		else
+			return fieldClass;
 	}
 }

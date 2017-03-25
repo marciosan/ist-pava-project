@@ -3,8 +3,8 @@ package ist.meic.pa;
 public class Test{
 	
 	public static void main(String[] args){
-//		Widget w0 = new Widget();
-//		System.out.println(w0);
+		Widget w0 = new Widget();
+		System.out.println(w0);
 		
 //		Widget w1 = new Widget("description", "overriden description");
 //		System.out.println(w1);
@@ -20,8 +20,8 @@ public class Test{
 			//~ (double) 10 + Math.PI, "c", 'k', "bool", true);
 		//~ System.out.println(p2);
 		
-//		ExtendedWidget ex1 = new ExtendedWidget();
-//		System.out.println(ex1);
+		ExtendedWidget ex1 = new ExtendedWidget();
+		System.out.println(ex1);
 		
 //		ExtendedWidget ex2 = new ExtendedWidget("ratio", 10000);
 //		System.out.println(ex2);
@@ -30,10 +30,10 @@ public class Test{
 		//~ System.out.println(new BadClass());
 		
 		// test A
-		System.err.println(new Widget());
-		System.err.println(new Widget("width", 80));
-		System.err.println(new Widget("height", 30));
-		System.err.println(new Widget("margin", 2));
-		System.err.println(new Widget("width", 8, "height", 13, "margin", 21));
+//		System.err.println(new Widget());
+//		System.err.println(new Widget("width", 80));
+//		System.err.println(new Widget("height", 30));
+//		System.err.println(new Widget("margin", 2));
+//		System.err.println(new Widget("width", 8, "height", 13, "margin", 21));
 	}
 }

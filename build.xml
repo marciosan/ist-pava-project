@@ -24,7 +24,7 @@
 	</target>
 	
 	<target name="jar" depends="compile">
-    	<jar destfile="keyConstructors.jar" basedir="bin/classes">
+    	<jar destfile="bin/classes/keyConstructors.jar" basedir="bin/classes" excludes="bin/classes/keyConstructors.jar">
         	<zipgroupfileset dir="." includes="lib/javassist.jar"/>
         	<manifest>
       			<attribute name = "Main-Class" value = "ist.meic.pa.KeyConstructors"/>
