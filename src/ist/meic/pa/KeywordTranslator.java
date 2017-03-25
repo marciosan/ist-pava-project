@@ -174,22 +174,22 @@ public class KeywordTranslator implements Translator {
 		String str = "";
 		
 		if (className.equals("byte")){	
-			str = "((Byte) value).byteValue();";				
+			str = "((Number) value).byteValue();";				
 		}
 		else if (className.equals("short")){	
-			str = "((Short) value).shortValue();";				
+			str = "((Number) value).shortValue();";				
 		}
 		else if (className.equals("int")){					
 			str = "((Integer) value).intValue();";
 		}
 		else if (className.equals("long")){
-			str = "((Long) value).longValue();";				
+			str = "((Number) value).longValue();";			
 		}
 		else if (className.equals("float")){					
-			str = "((Float) value).floatValue();"; // TODO: is double ok?
+			str = "((Number) value).floatValue();"; // TODO: is double ok?
 		}
 		else if (className.equals("double")){
-			str = "((Double) value).doubleValue();";				
+			str = "((Number) value).doubleValue();";				
 		}
 		else if (className.equals("char")){
 			str = "((Character) value).charValue();";				
