@@ -7,7 +7,7 @@ class Widget {
 	float margin;
 	long longNumber;
 
-	@KeywordArgs("width=100,height=50,margin=5,longNumber")
+	@KeywordArgs("width=height,height=5,margin=height,longNumber=height")
 	public Widget(Object... args) {}
 
 	public String toString() {

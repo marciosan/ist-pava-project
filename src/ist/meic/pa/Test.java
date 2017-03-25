@@ -30,7 +30,7 @@ public class Test{
 		//~ System.out.println(new BadClass());
 		
 		// test A
-		System.err.println(new Widget("longNumber", 30, "margin", 5, "width", 30.0));
+		System.err.println(new Widget());
 		
 		//~ System.err.println(new ComplexStrings());
 	}

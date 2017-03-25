@@ -102,8 +102,16 @@ public class KeywordTranslator implements Translator {
 	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException, ClassNotFoundException, NoSuchFieldException{
 		
 		String body = "{\n";
+		
 		for(String k : argsMap.keySet()){
-			body+= String.format("\tthis.%s = %s;\n", k, argsMap.get(k));
+			String v = argsMap.get(k);
+			
+			if(argsMap.get(v) == null){ // a normal field: int a = 3, float b = Math.PI
+				body+= String.format("\tthis.%s = %s;\n", k, v);
+			}
+			else { // a param that is equal to another field: int a = b, int b = a
+				body+= String.format("\tthis.%s = %s;\n", k, argsMap.get(v));
+			}
 		}
 		body+=" \tObject[] args = $1 ;\n";
 		body+="\n\n";
