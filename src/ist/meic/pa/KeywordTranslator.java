@@ -58,10 +58,10 @@ public class KeywordTranslator implements Translator {
 		if(anotStr.trim().isEmpty())
 			return map;
 		
-		String[] keyVals = Parser.splitByComma(anotStr);
+		String[] keyVals = Parser.splitBy(anotStr, ',');
 		
 		for(String kv: keyVals){
-			String[] keyValues = kv.trim().split("="); 
+			String[] keyValues = Parser.splitBy(kv.trim(), '=');
 			
 			if(keyValues.length < 1 && keyValues[0] != null){ 
 				// should produce array with 1 or 2 indexes (1 without default, 2 with default)
@@ -99,8 +99,16 @@ public class KeywordTranslator implements Translator {
 	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException, ClassNotFoundException, NoSuchFieldException{
 		
 		String body = "{\n";
+		
 		for(String k : argsMap.keySet()){
-			body+= String.format("\tthis.%s = %s;\n", k, argsMap.get(k));
+			String v = argsMap.get(k);
+			
+			if(argsMap.get(v) == null){ // a normal field: int a = 3, float b = Math.PI
+				body+= String.format("\tthis.%s = %s;\n", k, v);
+			}
+			else { // a param that is equal to another field: int a = b, int b = a
+				body+= String.format("\tthis.%s = %s;\n", k, argsMap.get(v));
+			}
 		}
 		body+=" \tObject[] args = $1 ;\n";
 		body+="\n\n";
@@ -159,22 +167,22 @@ public class KeywordTranslator implements Translator {
 		String str = "";
 		
 		if (className.equals("byte")){	
-			str = "((Byte) value).byteValue();";				
+			str = "((Number) value).byteValue();";				
 		}
 		else if (className.equals("short")){	
-			str = "((Short) value).shortValue();";				
+			str = "((Number) value).shortValue();";				
 		}
 		else if (className.equals("int")){					
 			str = "((Integer) value).intValue();";
 		}
 		else if (className.equals("long")){
-			str = "((Long) value).longValue();";				
+			str = "((Number) value).longValue();";			
 		}
 		else if (className.equals("float")){					
-			str = "((Float) value).floatValue();"; // TODO: is double ok?
+			str = "((Number) value).floatValue();"; // TODO: is double ok?
 		}
 		else if (className.equals("double")){
-			str = "((Double) value).doubleValue();";				
+			str = "((Number) value).doubleValue();";				
 		}
 		else if (className.equals("char")){
 			str = "((Character) value).charValue();";				

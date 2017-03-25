@@ -28,12 +28,10 @@ public class Test{
 		
 		
 		//~ System.out.println(new BadClass());
+
+		System.err.println(new Widget());
 		
-		// test A
-//		System.err.println(new Widget());
-//		System.err.println(new Widget("width", 80));
-//		System.err.println(new Widget("height", 30));
-//		System.err.println(new Widget("margin", 2));
-//		System.err.println(new Widget("width", 8, "height", 13, "margin", 21));
+		//~ System.err.println(new ComplexStrings());
+
 	}
 }
