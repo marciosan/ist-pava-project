@@ -7,7 +7,7 @@ public class Widget{
 	public int height;
 	public float width;
 	
-	@KeywordArgs("name=\"Default Widget\",description=\"default widget from annotations\",height=3+3,width=(double)Math.sin(0.0)+7")
+	@KeywordArgs("")
 	public Widget(Object... args){
 	}
 	

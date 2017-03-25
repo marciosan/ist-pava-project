@@ -55,8 +55,8 @@ public class KeywordTranslator implements Translator {
 		HashMap<String,String> map = new HashMap<String,String>();
 		
 		// empty annotation
-//		if(anotStr.trim().isEmpty())
-//			return map;
+		if(anotStr.trim().isEmpty())
+			return map;
 		
 		String[] keyVals = anotStr.split(",");
 		
