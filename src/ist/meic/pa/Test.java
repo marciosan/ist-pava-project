@@ -9,8 +9,8 @@ public class Test{
 //		Widget w1 = new Widget("description", "overriden description");
 //		System.out.println(w1);
 		
-//		Widget w2 = new Widget("name", "bad params on widget", "weight", 3.0);
-//		System.out.println(w2);
+		//~ Widget w2 = new Widget("name", "bad params on widget", "weight", 3.0);
+		//~ System.out.println(w2);
 		
 //		Primitives p1 = new Primitives();
 //		System.out.println(p1);

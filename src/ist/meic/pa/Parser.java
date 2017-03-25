@@ -1,7 +1,6 @@
 package ist.meic.pa;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Parser {
 	
@@ -55,5 +54,62 @@ public class Parser {
 		else
 			return null;
 			
+	}
+	
+	public static String[] splitByComma(String line){
+		// tested with the following values
+		// String [] inputs = {"a=1,b=2", "a=func(1,2,3),b=5", "a={1,2,3}", "a=\"1,2,3\",b=5","a=\',\',b=7","a=\"a,\\\",b \""};
+		
+		ArrayList<String> strList = new ArrayList<String>();
+		int nParenthesis = 0;
+		int nBrackets = 0;
+		boolean insideString = false;	
+		boolean insideChar = false;	
+		
+		StringBuilder sb = new StringBuilder("");
+		
+		char[] charArr = line.toCharArray();
+		for(int i = 0; i < line.length(); i++){
+			char c = charArr[i];
+			
+			if( c == ',' && nParenthesis == 0 && nBrackets == 0 
+				&& !insideString && !insideChar){
+				
+				strList.add(sb.toString());
+				sb.setLength(0);
+			}
+			else if( c == '('){
+				nParenthesis++;
+				sb.append(c);
+			}
+			else if( c == ')'){
+				nParenthesis--;
+				sb.append(c);
+			}
+			else if( c == '{'){
+				nBrackets++;
+				sb.append(c);
+			}
+			else if( c == '}'){
+				nBrackets--;
+				sb.append(c);
+			}
+			else if( c == '\"' && charArr[i-1] != '\\'){
+				insideString = !insideString;
+				sb.append(c);
+			}
+			else if( c == '\''){
+				insideChar = !insideChar;
+				sb.append(c);
+			}
+			else sb.append(c);
+		}
+		
+		String s = sb.toString();
+		if(! s.isEmpty() ){
+			strList.add(s);
+		}
+		
+		return strList.toArray(new String[strList.size()]);
 	}
 }

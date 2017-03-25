@@ -7,7 +7,7 @@ public class Widget{
 	public int height;
 	public float width;
 	
-	@KeywordArgs("")
+	@KeywordArgs("name=\"bond,james bond\",width=(float)Math.max(2,3)")
 	public Widget(Object... args){
 	}
 	
