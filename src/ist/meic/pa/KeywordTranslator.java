@@ -13,8 +13,14 @@ import java.lang.reflect.Field;
 import javassist.*;
 
 public class KeywordTranslator implements Translator {
-	
+	static final boolean DEBUG = false;
 	List<String> annotAttribs;
+	
+	public static void debug(String s){
+		if(KeywordTranslator.DEBUG){
+			System.err.println(s);
+		}
+	}
 	
 	@Override
 	public void start(ClassPool pool) throws NotFoundException, CannotCompileException {
@@ -39,10 +45,11 @@ public class KeywordTranslator implements Translator {
 		for(CtConstructor ctConstructor: ctClass.getDeclaredConstructors()) {
 			
 			if(ctConstructor.hasAnnotation("ist.meic.pa.KeywordArgs")) {
-				System.out.println("Constructor found: " + ctConstructor.getName());
+				KeywordTranslator.debug("Constructor found: " + ctConstructor.getName());
 				
 				Object annotation = ctConstructor.getAnnotation(KeywordArgs.class);
 				KeywordArgs ka = (KeywordArgs)annotation;
+
 				
 				Map<String,String> argsMap = annotationToMap(ka.value(), className, new HashMap<String,String>());
 				makeConstructor(ctClass, ctConstructor, argsMap);
@@ -54,10 +61,10 @@ public class KeywordTranslator implements Translator {
 	
 	private Map<String,String> annotationToMap(String anotStr, String className, Map<String, String> map) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException{
 
-		System.out.println(">>>>>>>entering class " + className);
-		System.out.println(">>>>>>>annot: " + anotStr);
+		debug(">>>>>>>entering class " + className);
+		debug(">>>>>>>annot: " + anotStr);
 		for(String s : annotAttribs)
-			System.out.println("Annot when entering class " + className + ": " + s);
+			debug("Annot when entering class " + className + ": " + s);
 		// empty annotation
 		if(anotStr.trim().isEmpty())
 			return map;
@@ -73,14 +80,14 @@ public class KeywordTranslator implements Translator {
 			}
 			
 			String key = keyValues[0];
-			System.out.println("Found key: " + key);
+			debug("Found key: " + key);
 
 			// save attribute name
 			if(! classHasAttribute(Class.forName(className), key)){
 				continue;
 			}
 			this.annotAttribs.add(key);
-			System.out.println("Added key: " + key);
+			debug("Added key: " + key);
 			
 			if(keyValues.length !=2){
 				continue;
@@ -93,7 +100,7 @@ public class KeywordTranslator implements Translator {
 			
 			if(!map.containsKey(key)) {
 				map.put(key,value);
-				System.out.println("map.put " + key + "," + value);
+				debug("map.put " + key + "," + value);
 			}
 		}
 		
@@ -117,8 +124,8 @@ public class KeywordTranslator implements Translator {
 		annotAttribs.clear();
 		annotAttribs.addAll(hs);
 		for(String s : annotAttribs)
-			System.out.println("Annot when exiting class " + className + ": " + s);
-		System.out.println("-----------------------");
+			debug("Annot when exiting class " + className + ": " + s);
+		debug("-----------------------");
 					
 		return map;
 	}
@@ -190,9 +197,9 @@ public class KeywordTranslator implements Translator {
 		body+="\t}\n"; // end of for }
 		body+="\n}";
 		
-		System.out.println("BODY #########");
-		System.out.println(body);
-		System.out.println("BODY #########");
+		KeywordTranslator.debug("BODY #########");
+		KeywordTranslator.debug(body);
+		KeywordTranslator.debug("BODY #########");
 		ctConstructor.setBody(body);		
 	}
 
