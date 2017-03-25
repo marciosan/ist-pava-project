@@ -58,7 +58,7 @@ public class KeywordTranslator implements Translator {
 		if(anotStr.trim().isEmpty())
 			return map;
 		
-		String[] keyVals = anotStr.split(",");
+		String[] keyVals = Parser.splitByComma(anotStr);
 		
 		for(String kv: keyVals){
 			String[] keyValues = kv.trim().split("="); 
