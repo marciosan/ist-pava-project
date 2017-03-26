@@ -1,4 +1,4 @@
-<project name="ist-pava-project-1" default="init" basedir=".">
+<project name="ist-pava-project-1" default="jar" basedir=".">
 
 	<path id="project.class.path">
   		<pathelement location="bin/classes/"/>
@@ -24,7 +24,7 @@
 	</target>
 	
 	<target name="jar" depends="compile">
-    	<jar destfile="bin/classes/keyConstructors.jar" basedir="bin/classes" excludes="bin/classes/keyConstructors.jar">
+    	<jar destfile="keyConstructors.jar" basedir="bin/classes" excludes="sbin/classes/keyConstructors.jar">
         	<zipgroupfileset dir="." includes="lib/javassist.jar"/>
         	<manifest>
       			<attribute name = "Main-Class" value = "ist.meic.pa.KeyConstructors"/>

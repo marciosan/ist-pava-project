@@ -13,12 +13,12 @@ class ComplexStrings extends Widget {
 		String s= "";
 		s+= String.format("- %s\n- %s\n- %c\n", a, b, c);
 		s+= d + "\n";
-		
+
 		//~ for(int i: e){
 			//~ s+= i + ", ";
 		//~ }
-		
+
 		return s;
-		
+
 	}
 }
