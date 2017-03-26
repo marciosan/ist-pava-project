@@ -5,7 +5,7 @@ import java.lang.reflect.*;
 import javassist.*;
 
 public class KeywordTranslator implements Translator {
-	static final boolean DEBUG = false;
+	static final boolean DEBUG = true;
 	List<String> annotAttribs;
 
 	public static void debug(String s){
@@ -37,7 +37,7 @@ public class KeywordTranslator implements Translator {
 		}
 	}
 
-	/**
+	/** FIXME: describe method
 	*/
 	private void checkAnnotations(ClassPool pool, String className) throws NotFoundException, CannotCompileException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 
@@ -54,7 +54,8 @@ public class KeywordTranslator implements Translator {
 				makeConstructor(ctClass, ctConstructor, argsMap);
 				annotAttribs.clear();
 
-				// FIXME: this could be problematic if we handled multiple annotated constructors
+				// FIXME:
+				// this could be problematic if we handled multiple annotated constructors
 				// (we do not, as per the specification)
 				makeEmptyConstructor(ctClass);
 			}
@@ -147,12 +148,25 @@ public class KeywordTranslator implements Translator {
 
 	/** Creates a constructor that handles annotations. It can be divided in two parts:
 	 * 1. Initialize object with default values at load time.
-	 * 2. Create a mechanism to process arguments from (Obj... args) and set them at run time.
-	 *
+	 * 2. Create a mechanism to process arguments from (Object ... args) and set them at run time.
 	*/
 	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException, ClassNotFoundException, NoSuchFieldException{
 
 		String body = "{\n";
+		body+= makeAnnotationsProcessor(argsMap);
+		body+= "\n";
+		body+= makeParametersProcessor(ctClass);
+		body+="}";
+
+		KeywordTranslator.debug(String.format("BODY #########%s\n#########",body));
+		ctConstructor.setBody(body);
+	}
+
+	/**
+	 * Builds a part of the constructor body, processing keywords with default values.
+	 */
+	private String makeAnnotationsProcessor(Map<String,String> argsMap){
+		String body = "";
 
 		for(String k : argsMap.keySet()){
 			String v = argsMap.get(k);
@@ -160,12 +174,21 @@ public class KeywordTranslator implements Translator {
 			if(argsMap.get(v) == null){ // a normal field: int a = 3, float b = Math.PI
 				body+= String.format("\tthis.%s = %s;\n", k, v);
 			}
-			else { // a param that is equal to another field: int a = b, int b = a
+			else { // a param that references another field: int a = b, int b = a
 				body+= String.format("\tthis.%s = %s;\n", k, argsMap.get(v));
 			}
 		}
+
+		return body;
+	}
+
+	/**
+	 * Builds a part of the constructor body, which processes the parameters array (Object... args)
+	 */
+	private String makeParametersProcessor(CtClass ctClass) throws ClassNotFoundException, NoSuchFieldException{
+		String body = "";
 		body+=" \tObject[] args = $1 ;\n";
-		body+="\n\n";
+		body+="\n";
 
 		body += "\tjava.util.ArrayList attributes = new java.util.ArrayList();\n";
 
@@ -187,7 +210,7 @@ public class KeywordTranslator implements Translator {
 		body+= "\t\tObject o = args[i];\n";
 		body+= "\t\tObject value = args[i+1];\n\n";
 
-		body+="\n\n";
+		body+="\n";
 
 		Class fieldClass = null;
 		String className = null;
@@ -209,12 +232,7 @@ public class KeywordTranslator implements Translator {
 			body+= String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = (%s) value;\n\n", attrib, attrib, className);
 		}
 		body+="\t}\n"; // end of for }
-		body+="\n}";
-
-		KeywordTranslator.debug("BODY #########");
-		KeywordTranslator.debug(body);
-		KeywordTranslator.debug("BODY #########");
-		ctConstructor.setBody(body);
+		return body;
 	}
 
 	/** Processes primitives, which are handled differently than objects.
