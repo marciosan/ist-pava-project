@@ -1,5 +1,24 @@
 # ist-pava-project
-Advanced Programming project at IST Lisbon
+
+Advanced Programming project at IST Lisbon.
+
+Goal: Implementation of keyword parameters in Java using reflection and Javassist.
+
+
+# Run instructions
+
+1. Compile source files and create jar:
+
+	$ ant
+
+2. Compile all tests in tests folder (with dependency for keyConstructors.jar):
+
+	$ compile
+
+3. Run (assuming test class files are in directory bin/tests):
+
+	$ java -cp 'keyConstructors.jar:bin/tests' ist.meic.pa.KeyConstructors Test
+
 
 # Objectivos
 
