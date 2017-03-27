@@ -211,7 +211,10 @@ public class KeywordTranslator implements Translator {
 		body+= "\t\tObject value = args[i+1];\n\n";
 
 		body+="\n";
-
+		
+		body += "\t\tif(! attributes.contains((String)o)){ " +
+				"throw new RuntimeException(\"Unrecognized keyword: \" + (String) o); }\n";
+		
 		Class<?> fieldClass = null;
 		String className = null;
 		for(String attrib: annotAttribs){
@@ -219,8 +222,7 @@ public class KeywordTranslator implements Translator {
 			fieldClass = getFieldClass(c, attrib);
 			className = fieldClass.getName();
 
-			body += "\t\tif(! attributes.contains((String)o)){ " +
-				"throw new RuntimeException(\"Unrecognized keyword: \" + (String) o); }\n";
+
 
 			if(fieldClass.isPrimitive()){
 				String attribution = primitiveCasting(className);
