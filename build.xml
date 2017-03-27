@@ -1,4 +1,4 @@
-<project name="ist-pava-project-1" default="init" basedir=".">
+<project name="ist-pava-project-1" default="jar" basedir=".">
 
 	<path id="project.class.path">
   		<pathelement location="bin/classes/"/>

@@ -10,14 +10,14 @@ public class Primitives{
 	public double d;
 	public char c;
 	public boolean bool;
-	
+
 	public String name;
 	public String description;
-	
+
 	@KeywordArgs("byt=1,shrt=2,i=3,l=4444444,f=5.55,d=3+ Math.PI,c='c',bool=true")
 	public Primitives(Object... args){}
-	
-	@Override 
+
+	@Override
 	public String toString(){
 		java.lang.StringBuilder builder = new java.lang.StringBuilder();
 		builder.append("Primitives: \n");
@@ -29,7 +29,7 @@ public class Primitives{
 		builder.append("double:\t" + d + "\n");
 		builder.append("char:\t" + c + "\n");
 		builder.append("bool:\t" + bool + "\n");
-		
+
 		return builder.toString();
 	}
 }
