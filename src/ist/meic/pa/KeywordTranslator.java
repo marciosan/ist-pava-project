@@ -5,7 +5,7 @@ import java.lang.reflect.*;
 import javassist.*;
 
 public class KeywordTranslator implements Translator {
-	static final boolean DEBUG = true;
+	static final boolean DEBUG = false;
 	List<String> annotAttribs;
 
 	public static void debug(String s){
@@ -30,7 +30,7 @@ public class KeywordTranslator implements Translator {
 	public void onLoad(ClassPool pool, String className) throws NotFoundException, CannotCompileException {
 
 		try {
-			checkAnnotations(pool, className);
+			processClass(pool, className);
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -39,7 +39,7 @@ public class KeywordTranslator implements Translator {
 
 	/** FIXME: describe method
 	*/
-	private void checkAnnotations(ClassPool pool, String className) throws NotFoundException, CannotCompileException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+	private void processClass(ClassPool pool, String className) throws NotFoundException, CannotCompileException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 
 		CtClass ctClass = pool.get(className);
 		for(CtConstructor ctConstructor: ctClass.getDeclaredConstructors()) {
@@ -194,7 +194,7 @@ public class KeywordTranslator implements Translator {
 
 		// create arraylist with attributes
 		// constructor will need this at runtime to process parameters
-		Class c = Class.forName(ctClass.getName());
+		Class<?> c = Class.forName(ctClass.getName());
 		for(String attrib: annotAttribs){
 			body+= String.format("\tattributes.add(\"%s\");\n", attrib);
 
@@ -212,7 +212,7 @@ public class KeywordTranslator implements Translator {
 
 		body+="\n";
 
-		Class fieldClass = null;
+		Class<?> fieldClass = null;
 		String className = null;
 		for(String attrib: annotAttribs){
 
@@ -251,7 +251,7 @@ public class KeywordTranslator implements Translator {
 			str = "((Number) value).shortValue();";
 		}
 		else if (className.equals("int")){
-			str = "((Integer) value).intValue();";
+			str = "((Number) value).intValue();";
 		}
 		else if (className.equals("long")){
 			str = "((Number) value).longValue();";
