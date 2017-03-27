@@ -7,10 +7,12 @@
 
 	<target name="init">
 		<mkdir dir="bin/classes"/>
+		<mkdir dir="bin/tests"/>
 	</target>
 	
 	<target name="clean">
 		<delete dir="bin/classes"/>
+		<delete dir="bin/tests"/>
 	</target>
 	
 	<target name="compile" depends="init">
@@ -24,7 +26,7 @@
 	</target>
 	
 	<target name="jar" depends="compile">
-    	<jar destfile="bin/classes/keyConstructors.jar" basedir="bin/classes" excludes="bin/classes/keyConstructors.jar">
+    	<jar destfile="./keyConstructors.jar" basedir="bin/classes">
         	<zipgroupfileset dir="." includes="lib/javassist.jar"/>
         	<manifest>
       			<attribute name = "Main-Class" value = "ist.meic.pa.KeyConstructors"/>
@@ -32,5 +34,18 @@
     	</jar>
 	</target>
 
+	<path id="tests.class.path">
+  		<pathelement location="bin/tests/"/>
+	</path>
+	
+	<target name="compileTests" depends="jar">
+		<javac srcdir="tests" destdir="bin/tests" includeantruntime="false">
+			<classpath>
+		           <fileset dir=".">
+		              <include name="**/*.jar" />
+		           </fileset>
+		     </classpath>
+		</javac>
+	</target>	
 </project>
 
