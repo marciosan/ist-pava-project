@@ -1,8 +1,8 @@
-# ist-pava-project
+# IST PAva Project no.1
 
-Advanced Programming project at IST Lisbon.
+Advanced Programming project at [Técnico Lisboa](https://tecnico.ulisboa.pt/pt/)
 
-Goal: Implementation of keyword parameters in Java using reflection and Javassist.
+Goal: Implementation of keyword parameters in Java using reflection and Javassist
 
 
 # Run instructions
