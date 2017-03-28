@@ -5,26 +5,26 @@ import java.lang.reflect.*;
 import javassist.*;
 
 public class KeywordTranslator implements Translator {
+	
+	List<String> annotAttribs; // collection of all attributes in a class (possibly superclasses too)
 	static final boolean DEBUG = false;
-	List<String> annotAttribs;
 
-	public static void debug(String s){
-		/** Print messages during tests.
-		 */
-		if(KeywordTranslator.DEBUG){
-			System.err.println(s);
-		}
-	}
-
-
-	/** FIXME: describe method
+	/** 
+	 * Loader invokes this for initialization when the translator is attached to the loader
+	 * 
+	 * @param pool - the pool to be used by the translator
 	*/
 	@Override
 	public void start(ClassPool pool) throws NotFoundException, CannotCompileException {
 		annotAttribs = new ArrayList<String>();
 	}
 
-	/** Process a class before it is loaded to the JVM.
+	
+	/** 
+	 * Invoked by a loader when a class is loaded
+	 * 
+	 * @param pool - the pool to be used by the translator
+	 * @param className - the name of the class being loaded
 	*/
 	@Override
 	public void onLoad(ClassPool pool, String className) throws NotFoundException, CannotCompileException {
@@ -37,7 +37,12 @@ public class KeywordTranslator implements Translator {
 		}
 	}
 
-	/** FIXME: describe method
+	
+	/** 
+	 * Process a class before it is loaded to the JVM
+	 * 
+	 * @param pool - the pool to be used by the translator
+	 * @param className - the name of the class being loaded
 	*/
 	private void processClass(ClassPool pool, String className) throws NotFoundException, CannotCompileException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 
@@ -48,41 +53,55 @@ public class KeywordTranslator implements Translator {
 				KeywordTranslator.debug("Constructor found: " + ctConstructor.getName());
 
 				Object annotation = ctConstructor.getAnnotation(KeywordArgs.class);
-				KeywordArgs ka = (KeywordArgs)annotation;
+				KeywordArgs ka = (KeywordArgs) annotation;
 
+				// collect attributes and their values
 				Map<String,String> argsMap = annotationToMap(ka.value(), className, new HashMap<String,String>());
+				
+				// modify the constructor
 				makeConstructor(ctClass, ctConstructor, argsMap);
-				annotAttribs.clear();
-
-				// FIXME:
-				// this could be problematic if we handled multiple annotated constructors
-				// (we do not, as per the specification)
+				
+				// an empty constructor is needed when handing inheritance
+				// could be problematic if we handled multiple annotated constructors (we do not, as per the specification)
 				makeEmptyConstructor(ctClass);
+				
+				// clear attributes list for this class
+				annotAttribs.clear();
 			}
 		}
 	}
 
-	/** Transforms a string anotation of attribute=defaultValue into a HashMap of  <Attributes,Values>.
-	 * Also saves all anotatted attributes (even without default value) into the array annotAttribs.
-	 * That's because all annotated attributes are needed in the new constructor body, as it will need to process
-	 * its paremeters (Obj... args).
+	
+	/** 
+	 * Transforms a string annotation of type attribute=defaultValue into a Map<attribute,defaultValue>
+	 * Also saves all annotated attributes (even without default value) into the array annotAttribs (that's
+	 * because all annotated attributes are needed in the new constructor body, as it will need them to process
+	 * its parameters (Obj... args)
+	 * 
+	 * @param annotStr - the annotation string
+	 * @param className - the class name
+	 * @param map - container for pairs (attribute, value)
+	 * 
+	 * @return map with pairs (attribute, value)
 	*/
 	private Map<String,String> annotationToMap(String anotStr, String className, Map<String, String> map) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException{
 
-		debug(">>>>>>>entering class " + className);
-		debug(">>>>>>>annot: " + anotStr);
+		/* start of debug */
+		debug("Entering class " + className + ", annotation " + anotStr);
 		for(String s : annotAttribs)
-			debug("Annot when entering class " + className + ": " + s);
+			debug("Annotation when entering class " + className + ": " + s);
+		/* end of debug */
+		
 		// empty annotation
 		if(anotStr.trim().isEmpty())
 			return map;
 
-		String[] keyVals = Parser.splitBy(anotStr, ',');
+		String[] keyVals = Parser.splitBy(anotStr, ','); // split annotation to get string attribute=defaultValue
 
-		for(String kv: keyVals){
-			String[] keyValues = Parser.splitBy(kv.trim(), '=');
+		for(String kv: keyVals) {
+			String[] keyValues = Parser.splitBy(kv.trim(), '='); // split attribute=defaultValue
 
-			if(keyValues.length < 1 && keyValues[0] != null){
+			if(keyValues.length < 1 && keyValues[0] != null) {
 				// should produce array with 1 or 2 indexes (1 without default, 2 with default)
 				continue;
 			}
@@ -90,14 +109,17 @@ public class KeywordTranslator implements Translator {
 			String key = keyValues[0];
 			debug("Found key: " + key);
 
-			// save attribute name
-			if(! classHasAttribute(Class.forName(className), key)){
+			if(!classHasAttribute(Class.forName(className), key)) {
 				continue;
 			}
-			this.annotAttribs.add(key);
-			debug("Added key: " + key);
+			
+			// save attribute name (only name, without default value)
+			if(!annotAttribs.contains(key)) { // don't add duplicate attributes
+				this.annotAttribs.add(key);
+				debug("Added key: " + key);
+			}
 
-			if(keyValues.length !=2){
+			if(keyValues.length !=2) { // no default value to save
 				continue;
 			}
 
@@ -106,75 +128,75 @@ public class KeywordTranslator implements Translator {
 				continue;
 			}
 
-			if(!map.containsKey(key)) {
+			// save attribute and default value
+			if(!map.containsKey(key)) { // don't add duplicate attributes
 				map.put(key,value);
-				debug("map.put " + key + "," + value);
+				debug("Saved pair (" + key + "," + value + ")");
 			}
 		}
 
-		// collect annotations from the superclass
+		// check annotations of the superclass
 		Class<?> superClass = Class.forName(className).getSuperclass();
+		
 		if(superClass != null) {
 
 			Constructor<?>[] cons = superClass.getDeclaredConstructors();
 			KeywordArgs annot = (KeywordArgs) cons[0].getAnnotation(KeywordArgs.class);
 
-			if(Class.forName(className).equals("Object") || annot == null)
+			if(Class.forName(className).equals("Object") || annot == null) // no more work to do
 				return map;
 
 			String superClassName = superClass.getName();
-			annotationToMap(annot.value(), superClassName, map);
+			annotationToMap(annot.value(), superClassName, map); // recursively collect attributes and values
 		}
-
-		// remove duplicates from the annotations list
-		Set<String> hs = new HashSet<String>();
-		hs.addAll(annotAttribs);
-		annotAttribs.clear();
-		annotAttribs.addAll(hs);
-		for(String s : annotAttribs)
-			debug("Annot when exiting class " + className + ": " + s);
-		debug("-----------------------");
 
 		return map;
 	}
 
-	/** An empty constructor is required to handle inheritance.
-	*/
-	private void makeEmptyConstructor(CtClass ctClass) throws CannotCompileException{
 
-		CtConstructor ct = CtNewConstructor.defaultConstructor(ctClass);
-		ctClass.addConstructor(ct);
-	}
-
-	/** Creates a constructor that handles annotations. It can be divided in two parts:
-	 * 1. Initialize object with default values at load time.
-	 * 2. Create a mechanism to process arguments from (Object ... args) and set them at run time.
+	/** 
+	 * Creates a constructor that handles annotations. It can be divided in two parts:
+	 *   1. Initialize object with default values (at load time)
+	 *   2. Create a mechanism to process arguments from (Object ... args) and set attributes (at run time)
+	 *   
+	 * @param ctClass - the compile time class being modified
+	 * @param ctConstructor - the annotated constructor
+	 * @param argsMap - map with pairs (attribute, defaultValue)
 	*/
 	private void makeConstructor(CtClass ctClass, CtConstructor ctConstructor, Map<String,String> argsMap) throws CannotCompileException, ClassNotFoundException, NoSuchFieldException{
 
 		String body = "{\n";
-		body+= makeAnnotationsProcessor(argsMap);
-		body+= "\n";
-		body+= makeParametersProcessor(ctClass);
-		body+="}";
+		
+		body += makeAnnotationsProcessor(argsMap);
+		body += "\n";
+		body += makeParametersProcessor(ctClass);
+		body += "}";
 
-		KeywordTranslator.debug(String.format("BODY #########%s\n#########",body));
+		// add body to constructor
 		ctConstructor.setBody(body);
+		KeywordTranslator.debug(String.format("BODY #########\n%s\n#########", body));
 	}
 
+	
 	/**
-	 * Builds a part of the constructor body, processing keywords with default values.
+	 * Builds part of the constructor body, processing attributes with default values
+	 * 
+	 * @param argsMap - map with pairs (attribute, defaultValue)
+	 * 
+	 * @return the assembled part of the body
 	 */
-	private String makeAnnotationsProcessor(Map<String,String> argsMap){
+	private String makeAnnotationsProcessor(Map<String,String> argsMap) {
+		
 		String body = "";
 
-		for(String k : argsMap.keySet()){
+		// process pairs (attribute, defaultValue)
+		for(String k : argsMap.keySet()) {
 			String v = argsMap.get(k);
 
-			if(argsMap.get(v) == null){ // a normal field: int a = 3, float b = Math.PI
+			if(argsMap.get(v) == null) { // a normal field: int a = 3, float b = Math.PI
 				body+= String.format("\tthis.%s = %s;\n", k, v);
 			}
-			else { // a param that references another field: int a = b, int b = a
+			else { // a field that references another field: int a = b, int b = a
 				body+= String.format("\tthis.%s = %s;\n", k, argsMap.get(v));
 			}
 		}
@@ -182,102 +204,143 @@ public class KeywordTranslator implements Translator {
 		return body;
 	}
 
+	
 	/**
-	 * Builds a part of the constructor body, which processes the parameters array (Object... args)
+	 * Builds part of the constructor body, which processes the parameters array (Object... args)
+	 * 
+	 * @param ctClass - the compile time class being modified
+	 * 
+	 * @return the assembled part of the body
 	 */
 	private String makeParametersProcessor(CtClass ctClass) throws ClassNotFoundException, NoSuchFieldException{
+		
 		String body = "";
-		body+=" \tObject[] args = $1 ;\n";
-		body+="\n";
+		
+		body += " \tObject[] args = $1;\n";
+		body += "\n";
 
+		// add array list with attributes to the constructor
+		// it will be needed at runtime to process parameters
 		body += "\tjava.util.ArrayList attributes = new java.util.ArrayList();\n";
-
-		// create arraylist with attributes
-		// constructor will need this at runtime to process parameters
+		body += "\n";
+		
 		Class<?> c = Class.forName(ctClass.getName());
+		
+		// add every attribute to the array list
 		for(String attrib: annotAttribs){
-			body+= String.format("\tattributes.add(\"%s\");\n", attrib);
+			
+			body += String.format("\tattributes.add(\"%s\");\n", attrib);
 
 			if(! classHasAttribute(c, attrib)){
 				continue;
 			}
 		}
+		body += "\n";
 
-		body+="\n";
-
-		// LOOP IN JAVASSIST
-		body+= "\tfor(int i = 0; i < args.length; i+= 2) {\n";
-		body+= "\t\tObject o = args[i];\n";
-		body+= "\t\tObject value = args[i+1];\n\n";
-
-		body+="\n";
+		// loop in the constructor body to set attributes
+		body += "\tfor(int i = 0; i < args.length; i+= 2) {\n\n";
+		body += "\t\tObject o = args[i];\n"; // get attribute
+		body += "\t\tObject value = args[i+1];\n"; // get value
+		body +="\n";
 		
-		body += "\t\tif(! attributes.contains((String)o)){ " +
-				"throw new RuntimeException(\"Unrecognized keyword: \" + (String) o); }\n";
+		// unrecognized keyword raises exception
+		body += "\t\tif(!attributes.contains((String) o)) {\n" +
+				"\t\t\tthrow new RuntimeException(\"Unrecognized keyword: \" + (String) o); \n}\n";
+		body += "\n";
 		
 		Class<?> fieldClass = null;
 		String className = null;
-		for(String attrib: annotAttribs){
+		
+		// for each attribute, set value
+		for(String attrib: annotAttribs) {
 
-			fieldClass = getFieldClass(c, attrib);
+			fieldClass = getFieldType(c, attrib);
 			className = fieldClass.getName();
 
-
-
-			if(fieldClass.isPrimitive()){
+			// if field class is primitive, casting is needed
+			if(fieldClass.isPrimitive()) {
 				String attribution = primitiveCasting(className);
+				
 				body += String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = %s\n\n", attrib, attrib, attribution);
-
 				continue;
 			}
-
-			body+= String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = (%s) value;\n\n", attrib, attrib, className);
+			// field not of a primitive type
+			body += String.format("\t\tif (((String) o).equals(\"%s\")) this.%s = (%s) value;\n\n", attrib, attrib, className);
 		}
-		body+="\t}\n"; // end of for }
+		
+		body += "\t}\n"; // end of loop in the constructor body
+		
 		return body;
 	}
 
-	/** Processes primitives, which are handled differently than objects.
-	 * Primitives for numbers (byte, float, etc.) are upcast to number and then the correct value is extracted.
-	 *
-	 * Advantage: the types are very permissive and properly cast by the constructor
-	 * Disadvantage: loss of precision, as int n = Math.PI becomes int n =((Number) Math.PI).intValue()= 3.
+	
+	/**
+	 * Add a default constructor to the class (required to handle inheritance)
+	 * 
+	 * @param ctClass - the compile time class being modified
 	*/
-	public String primitiveCasting(String className){
+	private void makeEmptyConstructor(CtClass ctClass) throws CannotCompileException{
+
+		CtConstructor ct = CtNewConstructor.defaultConstructor(ctClass);
+		ctClass.addConstructor(ct);
+	}
+	
+	
+	/** 
+	 * Process primitive types, which are handled differently than objects
+	 * 
+	 * Primitives for numbers (byte, float, etc.) are upcast to number and then the correct value is extracted
+	 *   - Advantage: the types are very permissive and properly cast by the constructor
+	 *   - Disadvantage: loss of precision, as int n = Math.PI becomes int n =((Number) Math.PI).intValue() which evaluates to 3.
+	 * 
+	 * @param className - the class name
+	 * 
+	 * @return part of the body with the casting
+	*/
+	public String primitiveCasting(String className) {
+		
 		String str = "";
 
-		if (className.equals("byte")){
+		if(className.equals("byte")) {
 			str = "((Number) value).byteValue();";
 		}
-		else if (className.equals("short")){
+		else if(className.equals("short")) {
 			str = "((Number) value).shortValue();";
 		}
-		else if (className.equals("int")){
+		else if(className.equals("int")) {
 			str = "((Number) value).intValue();";
 		}
-		else if (className.equals("long")){
+		else if(className.equals("long")) {
 			str = "((Number) value).longValue();";
 		}
-		else if (className.equals("float")){
+		else if(className.equals("float")) {
 			str = "((Number) value).floatValue();"; // TODO: is double ok?
 		}
-		else if (className.equals("double")){
+		else if(className.equals("double")) {
 			str = "((Number) value).doubleValue();";
 		}
-		else if (className.equals("char")){
+		else if(className.equals("char")) {
 			str = "((Character) value).charValue();";
 		}
-		else if (className.equals("boolean")){
+		else if(className.equals("boolean")) {
 			str = "((Boolean) value).booleanValue();";
 		}
 
 		return str;
 	}
 
-	/** FIXME: describe method
+	
+	/**
+	 * Check if a class has a given attribute
+	 * 
+	 * @param aClass - a class
+	 * @param attribute - the name of the attribute
+	 * 
+	 * @return true if class has attribute; false otherwise
 	*/
 	public boolean classHasAttribute(Class<?> aClass, String attribute) throws NoSuchFieldException{
-		 if(aClass == null){
+		
+		 if(aClass == null) {
 			 return false;
 		 }
 
@@ -291,33 +354,37 @@ public class KeywordTranslator implements Translator {
 			 }
 		 }
 
-		 if(!hasAttribute) {// attribute not in this class; look in super classes
+		 if(!hasAttribute) { // attribute not in this class; look in super classes
 			 Class<?> superClass = aClass.getSuperclass();
-
-//			 if(superClass.getSimpleName().equals("Object"))
-//			 	hasAttribute = false;
-//			 else
-		 		hasAttribute = classHasAttribute(superClass, attribute);
+			 hasAttribute = classHasAttribute(superClass, attribute);
 		}
 
 		 return hasAttribute;
 	}
 
-	/** FIXME: describe method
+	
+	/** Get the type of a specific field from a given class
+	 * 
+	 * @param aClass - a class
+	 * @param attribute - the name of the field
+	 * 
+	 * @return the type of the field
+	 * 
+	 * @exception RuntimeException if class has no field with the specified name
 	*/
-	public Class<?> getFieldClass(Class<?> aClass, String attribute) {
+	public Class<?> getFieldType(Class<?> aClass, String field) {
 
 		Class<?> fieldClass = null;
 		boolean hasAttribute = false;
 
-		 if(aClass == null){
+		 if(aClass == null) {
 			 return null;
 		 }
 
 		 Field[] fields = aClass.getDeclaredFields();
 
 		 for(Field f : fields) {
-			 if(f.getName().equals(attribute)) { // class has attribute
+			 if(f.getName().equals(field)) { // class has attribute
 				 hasAttribute = true;
 				 fieldClass = f.getType();
 			 	 break;
@@ -328,15 +395,21 @@ public class KeywordTranslator implements Translator {
 			 Class<?> superClass = aClass.getSuperclass();
 
 			 if(superClass != null)
-//			 if(superClass.getSimpleName().equals("Object"))
-//			 	hasAttribute = false;
-//			 else
-		 		fieldClass = getFieldClass(superClass, attribute);
+		 		fieldClass = getFieldType(superClass, field);
 		}
 
 		if(fieldClass == null)
-			throw new RuntimeException("Unrecognized keyword: " + attribute);
+			throw new RuntimeException("Unrecognized keyword: " + field);
 		else
 			return fieldClass;
+	}
+	
+	/** debif purposes */
+	public static void debug(String s) {
+		/** Print messages during tests.
+		 */
+		if(KeywordTranslator.DEBUG){
+			System.err.println(s);
+		}
 	}
 }
