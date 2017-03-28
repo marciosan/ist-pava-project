@@ -13,7 +13,7 @@ Goal: Implementation of keyword parameters in Java using reflection and Javassis
 
 2. Compile all tests in tests folder (with dependency for keyConstructors.jar):
 
-	$ compile
+	$ compileTests
 
 3. Run (assuming test class files are in directory bin/tests):
 
